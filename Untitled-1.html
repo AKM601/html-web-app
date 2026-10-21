@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Harvest Commons — Growers' Co-op Market</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root{
+    --sidebar:#0a3a1c; --sidebar-soft:#11502a;
+    --hero-from:#104d28; --hero-to:#1b6b38;
+    --gold:#e3a634; --gold-soft:#fbecc8;
+    --bg:#faf9f4; --card:#fff; --ink:#0f2a17; --muted:#5d6b62; --border:#e6e4da;
+    --green:#1b6b38; --red:#b3402f; --blue:#2c6aa0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--ink);display:flex;min-height:100vh}
+  h1,h2,h3,.serif{font-family:"Fraunces",Georgia,serif}
+  button,input,select,textarea{font-family:inherit;font-size:15px;color:inherit}
+
+  /* Sidebar */
+  aside{width:256px;background:var(--sidebar);color:#e8f0ea;padding:20px 12px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0}
+  .brand{display:flex;align-items:center;gap:12px;padding:0 8px 28px}
+  .brand-icon{width:36px;height:36px;border-radius:10px;background:var(--gold);color:var(--sidebar);display:grid;place-items:center}
+  .brand-name{font-family:"Fraunces",serif;font-weight:700;font-size:19px;color:#fff}
+  .brand-sub{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#9db8a6;margin-top:2px}
+  nav{display:flex;flex-direction:column;gap:4px}
+  nav a{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;color:#d6e4da;text-decoration:none;font-size:15px;font-weight:500;transition:background .15s;position:relative}
+  nav a:hover{background:var(--sidebar-soft)}
+  nav a.active{background:var(--gold);color:var(--sidebar)}
+  nav svg{width:18px;height:18px}
+  .badge{margin-left:auto;background:var(--gold);color:var(--sidebar);font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px}
+  nav a.active .badge{background:var(--sidebar);color:var(--gold)}
+  .market-day{margin-top:auto;background:var(--sidebar-soft);border-radius:14px;padding:14px 16px}
+  .market-day small{color:var(--gold);font-weight:600;font-size:13px}
+  .market-day p{margin-top:4px;font-size:14px;color:#fff;font-weight:500}
+
+  /* Main */
+  main{flex:1;padding:40px 32px 64px;max-width:1160px;min-width:0}
+  .page-title{font-size:36px;font-weight:700;line-height:1.15}
+  .subtitle{margin-top:6px;color:var(--muted);font-size:16px}
+  .page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+
+  .hero{margin-top:28px;border-radius:24px;padding:40px;color:#fff;background:radial-gradient(circle at 95% 25%,rgba(227,166,52,.35),transparent 28%),linear-gradient(120deg,var(--hero-from),var(--hero-to))}
+  .eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:500}
+  .hero h2{margin-top:14px;font-size:34px;line-height:1.15;max-width:580px}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:var(--sidebar);border:0;border-radius:999px;padding:12px 20px;font-weight:600;cursor:pointer;transition:transform .15s,filter .15s}
+  .btn:hover{transform:translateY(-1px);filter:brightness(1.05)}
+  .btn svg{width:16px;height:16px}
+  .btn.hero-btn{margin-top:28px;padding:14px 22px}
+  .btn.dark{background:var(--sidebar);color:#fff}
+  .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--ink)}
+  .btn.danger{background:var(--red);color:#fff}
+  .btn.sm{padding:8px 14px;font-size:14px}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+  .grid{display:grid;gap:16px}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px 22px}
+  .stat-label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .stat-value{font-family:"Fraunces",serif;font-size:28px;font-weight:700;margin-top:8px}
+  .stat-note{font-size:13px;color:var(--muted);margin-top:4px}
+  .mt{margin-top:24px}.mt-s{margin-top:16px}
+
+  .action{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px 18px;font-weight:500;cursor:pointer;text-align:left;transition:box-shadow .15s,transform .15s}
+  .action:hover{box-shadow:0 6px 18px rgba(15,42,23,.08);transform:translateY(-1px)}
+  .icon{width:40px;height:40px;border-radius:12px;background:var(--gold-soft);color:#7a5410;display:grid;place-items:center;flex-shrink:0}
+  .icon svg{width:18px;height:18px}
+
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--gold-soft);color:#7a5410}
+  .pill.green{background:#dff1e4;color:#146232}
+  .pill.red{background:#f7dfda;color:var(--red)}
+  .pill.blue{background:#dcebf7;color:var(--blue)}
+
+  /* Forms */
+  label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
+  input,select,textarea{width:100%;border:1px solid var(--border);border-radius:12px;padding:11px 14px;background:#fff;outline:none}
+  input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(27,107,56,.12)}
+  textarea{resize:vertical;min-height:90px}
+  .field{margin-bottom:14px}
+  .row{display:flex;gap:12px;align-items:center}
+  .row>*{flex:1}
+
+  /* Marketplace */
+  .toolbar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+  .toolbar input{max-width:320px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 16px;cursor:pointer;font-weight:500;font-size:14px}
+  .chip.on{background:var(--sidebar);color:#fff;border-color:var(--sidebar)}
+  .product{display:flex;flex-direction:column;gap:6px}
+  .product .emoji{font-size:40px;background:var(--gold-soft);border-radius:16px;height:84px;display:grid;place-items:center;margin-bottom:8px}
+  .product h3{font-size:19px}
+  .price{font-family:"Fraunces",serif;font-weight:700;font-size:20px}
+  .qty{display:flex;align-items:center;gap:10px}
+  .qty button{width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:16px}
+
+  /* Tables / lists */
+  table{width:100%;border-collapse:collapse}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;padding:10px 8px;border-bottom:1px solid var(--border)}
+  td{padding:14px 8px;border-bottom:1px solid var(--border);font-size:15px}
+  tr:last-child td{border-bottom:0}
+  .pos{color:#146232;font-weight:600}.neg{color:var(--red);font-weight:600}
+
+  /* Tracker */
+  .tracker{display:flex;margin-top:16px}
+  .step{flex:1;text-align:center;font-size:12px;color:var(--muted);position:relative}
+  .step .dot{width:22px;height:22px;border-radius:50%;background:var(--border);margin:0 auto 6px;display:grid;place-items:center;color:#fff;font-size:12px;position:relative;z-index:1}
+  .step::before{content:"";position:absolute;top:10px;left:-50%;width:100%;height:3px;background:var(--border)}
+  .step:first-child::before{display:none}
+  .step.done .dot,.step.done::before{background:var(--green)}
+  .step.done{color:var(--ink);font-weight:600}
+
+  /* Community / members */
+  .avatar{width:44px;height:44px;border-radius:50%;background:var(--sidebar);color:var(--gold);display:grid;place-items:center;font-weight:700;flex-shrink:0;font-family:"Fraunces",serif}
+  .post-head{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+  .post-actions{display:flex;gap:16px;margin-top:12px;color:var(--muted);font-size:14px}
+  .post-actions button{background:none;border:0;cursor:pointer;display:flex;gap:6px;align-items:center;color:inherit}
+  .post-actions button.liked{color:var(--red)}
+  .post-actions svg{width:16px;height:16px}
+
+  /* Calculator */
+  .result{background:linear-gradient(120deg,var(--hero-from),var(--hero-to));color:#fff;border-radius:20px;padding:24px}
+  .result .big{font-family:"Fraunces",serif;font-size:40px;font-weight:700;margin:6px 0 14px}
+  .result dl{display:grid;grid-template-columns:1fr auto;gap:8px 16px;font-size:15px;border-top:1px solid rgba(255,255,255,.2);padding-top:14px}
+  .result dd{text-align:right;font-weight:600}
+
+  /* Calendar */
+  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .cal .dow{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center;padding:6px 0}
+  .day{min-height:84px;border:1px solid var(--border);border-radius:12px;padding:6px 8px;background:#fff;cursor:pointer;font-size:13px;overflow:hidden}
+  .day:hover{border-color:var(--green)}
+  .day.out{opacity:.35}
+  .day.today{border:2px solid var(--gold)}
+  .ev{font-size:11px;border-radius:6px;padding:2px 6px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ev.harvest{background:#dff1e4;color:#146232}
+  .ev.market{background:var(--gold-soft);color:#7a5410}
+  .ev.delivery{background:#dcebf7;color:var(--blue)}
+  .ev.other{background:#eee;color:#444}
+
+  /* Modal / toast / drawer */
+  .overlay{position:fixed;inset:0;background:rgba(10,30,16,.5);display:none;place-items:center;z-index:50;padding:16px}
+  .overlay.open{display:grid}
+  .modal{background:#fff;border-radius:24px;padding:28px;width:100%;max-width:460px;max-height:90vh;overflow:auto}
+  .modal h3{font-size:24px;margin-bottom:16px}
+  .modal .actions-row{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--sidebar);color:#fff;padding:12px 22px;border-radius:999px;font-weight:500;transition:transform .25s;z-index:60}
+  #toast.show{transform:translateX(-50%) translateY(0)}
+  #toast.err{background:var(--red)}
+  .cart-fab{position:fixed;right:24px;bottom:24px;z-index:40}
+  .empty{text-align:center;color:var(--muted);padding:32px}
+
+  @media(max-width:960px){
+    body{flex-direction:column}
+    aside{width:100%;height:auto;position:static;padding:12px}
+    .brand{padding-bottom:12px}
+    nav{flex-direction:row;overflow-x:auto;gap:6px}
+    nav a{white-space:nowrap;padding:8px 12px}
+    .market-day{display:none}
+    main{padding:24px 16px 80px}
+    .g4,.g3{grid-template-columns:repeat(2,1fr)}
+    .page-title{font-size:28px}
+    .hero{padding:28px}.hero h2{font-size:26px}
+  }
+  @media(max-width:560px){.g4,.g3,.g2{grid-template-columns:1fr}.day{min-height:62px}}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="brand">
+    <div class="brand-icon"><i data-lucide="sprout"></i></div>
+    <div>
+      <div class="brand-name">Harvest Commons</div>
+      <div class="brand-sub">Growers' Co-op Market</div>
+    </div>
+  </div>
+  <nav id="nav"></nav>
+  <div class="market-day">
+    <small>Next market day</small>
+    <p>Saturday 3 Oct · 07:00</p>
+  </div>
+</aside>
+
+<main id="view"></main>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div id="toast"></div>
+
+<script>
+/* =====================================================
+   DATA + STATE (saved in localStorage)
+===================================================== */
+const KEY = "harvest-commons-v1";
+const rand = () => Math.random().toString(36).slice(2, 8);
+
+const DEFAULT = {
+  profile: { name:"Thandi", surname:"Mokoena", farm:"Klipfontein Farm", email:"thandi@klipfontein.co.za", phone:"082 555 0142", region:"Gauteng", size:"42", crops:"Tomatoes, spinach, butternut", bio:"Third-generation grower supplying fresh produce across Gauteng." },
+  wallet: 12480,
+  transactions: [
+    { id:"t1", date:"2026-10-18", desc:"Sale — Tomatoes (Fresh Basket Co.)", amount:2400 },
+    { id:"t2", date:"2026-10-15", desc:"Payout to FNB ••4821", amount:-5000 },
+    { id:"t3", date:"2026-10-12", desc:"Sale — Spinach (Green Grocer)", amount:1380 },
+    { id:"t4", date:"2026-10-09", desc:"Purchase — Seedling trays", amount:-760 },
+    { id:"t5", date:"2026-10-05", desc:"Sale — Butternut (Soweto Market)", amount:3260 },
+  ],
+  salesThisMonth: 18240,
+  products: [
+    { id:"p1", name:"Roma Tomatoes", farm:"Klipfontein Farm", cat:"Vegetables", price:14.5, unit:"kg", stock:320, emoji:"🍅" },
+    { id:"p2", name:"Baby Spinach", farm:"Hlatshwayo Greens", cat:"Vegetables", price:22, unit:"kg", stock:90, emoji:"🥬" },
+    { id:"p3", name:"Butternut", farm:"Dlamini Estate", cat:"Vegetables", price:9.8, unit:"kg", stock:500, emoji:"🎃" },
+    { id:"p4", name:"Sweet Corn", farm:"Van der Merwe Co-op", cat:"Grains", price:7.2, unit:"kg", stock:640, emoji:"🌽" },
+    { id:"p5", name:"Navel Oranges", farm:"Limpopo Citrus", cat:"Fruit", price:12, unit:"kg", stock:410, emoji:"🍊" },
+    { id:"p6", name:"Free-range Eggs", farm:"Sunrise Poultry", cat:"Dairy & Eggs", price:58, unit:"tray (30)", stock:75, emoji:"🥚" },
+    { id:"p7", name:"Fresh Milk", farm:"Mabaso Dairy", cat:"Dairy & Eggs", price:16, unit:"litre", stock:260, emoji:"🥛" },
+    { id:"p8", name:"Red Onions", farm:"Karoo Fields", cat:"Vegetables", price:8.5, unit:"kg", stock:700, emoji:"🧅" },
+    { id:"p9", name:"Strawberries", farm:"Magaliesberg Berries", cat:"Fruit", price:48, unit:"punnet box", stock:55, emoji:"🍓" },
+  ],
+  cart: {},
+  orders: [
+    { id:"HC-2041", item:"Roma Tomatoes × 120 kg", total:1740, status:1, placed:"2026-10-19", eta:"2026-10-22" },
+    { id:"HC-2038", item:"Free-range Eggs × 10 trays", total:580, status:2, placed:"2026-10-17", eta:"2026-10-21" },
+    { id:"HC-2033", item:"Sweet Corn × 200 kg", total:1440, status:0, placed:"2026-10-20", eta:"2026-10-24" },
+  ],
+  members: [
+    { id:"m1", name:"Sipho Dlamini", farm:"Dlamini Estate", region:"Mpumalanga", crops:"Butternut, maize", connected:true },
+    { id:"m2", name:"Naledi Hlatshwayo", farm:"Hlatshwayo Greens", region:"Gauteng", crops:"Leafy greens, herbs", connected:true },
+    { id:"m3", name:"Pieter van der Merwe", farm:"Van der Merwe Co-op", region:"Free State", crops:"Maize, sunflower", connected:false },
+    { id:"m4", name:"Lerato Mabaso", farm:"Mabaso Dairy", region:"North West", crops:"Milk, cheese", connected:false },
+    { id:"m5", name:"Zanele Khumalo", farm:"Limpopo Citrus", region:"Limpopo", crops:"Oranges, lemons", connected:false },
+    { id:"m6", name:"Thabo Nkosi", farm:"Karoo Fields", region:"Northern Cape", crops:"Onions, potatoes", connected:true },
+  ],
+  posts: [
+    { id:"c1", author:"Sipho Dlamini", time:"2 hours ago", text:"Heavy rain forecast for Mpumalanga this weekend. Move harvested butternut under cover before Saturday's market!", likes:12, liked:false },
+    { id:"c2", author:"Naledi Hlatshwayo", time:"Yesterday", text:"Does anyone have a reliable supplier of drip irrigation fittings in the Johannesburg area? Looking for bulk pricing.", likes:5, liked:false },
+    { id:"c3", author:"Lerato Mabaso", time:"2 days ago", text:"Tip: pooling transport with two other co-op members cut my delivery cost per crate by almost 30% this month.", likes:21, liked:false },
+  ],
+  events: [
+    { id:"e1", date:"2026-10-02", title:"Tomato harvest lands", type:"harvest" },
+    { id:"e2", date:"2026-10-03", title:"Market day · 07:00", type:"market" },
+    { id:"e3", date:"2026-10-10", title:"Market day · 07:00", type:"market" },
+    { id:"e4", date:"2026-10-17", title:"Market day · 07:00", type:"market" },
+    { id:"e5", date:"2026-10-22", title:"Tomatoes delivery", type:"delivery" },
+    { id:"e6", date:"2026-10-24", title:"Market day · 07:00", type:"market" },
+    { id:"e7", date:"2026-10-31", title:"Market day · 07:00", type:"market" },
+  ],
+};
+
+let S;
+try { S = JSON.parse(localStorage.getItem(KEY)) || structuredClone(DEFAULT); }
+catch { S = structuredClone(DEFAULT); }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
+
+/* =====================================================
+   HELPERS
+===================================================== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const money = n => "R" + Math.round(n).toLocaleString("en-ZA").replace(/,/g, " ");
+const money2 = n => "R" + Number(n).toLocaleString("en-ZA", { minimumFractionDigits:2, maximumFractionDigits:2 }).replace(/,/g, " ");
+const initials = n => n.split(" ").map(w => w[0]).slice(0,2).join("").toUpperCase();
+const fmtDate = d => new Date(d + "T00:00").toLocaleDateString("en-ZA", { day:"numeric", month:"short", year:"numeric" });
+const todayISO = () => new Date().toISOString().slice(0,10);
+const ico = () => lucide.createIcons();
+
+function toast(msg, err=false){
+  const t = $("#toast"); t.textContent = msg; t.className = "show" + (err ? " err" : "");
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.className = "", 2600);
+}
+function openModal(html){ $("#modal").innerHTML = html; $("#overlay").classList.add("open"); ico(); }
+function closeModal(){ $("#overlay").classList.remove("open"); }
+$("#overlay").addEventListener("click", e => { if (e.target.id === "overlay") closeModal(); });
+
+const cartCount = () => Object.values(S.cart).reduce((a,b) => a+b, 0);
+const cartTotal = () => Object.entries(S.cart).reduce((t,[id,q]) => t + S.products.find(p => p.id===id).price * q, 0);
+const activeOrders = () => S.orders.filter(o => o.status < 3);
+
+/* =====================================================
+   ROUTES
+===================================================== */
+const ROUTES = [
+  { path:"home",        label:"Home",              icon:"home" },
+  { path:"marketplace", label:"Marketplace",       icon:"shopping-basket" },
+  { path:"orders",      label:"Orders & Delivery", icon:"truck" },
+  { path:"wallet",      label:"Wallet",            icon:"wallet" },
+  { path:"network",     label:"Co-op Network",     icon:"users" },
+  { path:"community",   label:"Community",         icon:"newspaper" },
+  { path:"calculator",  label:"Calculator",        icon:"calculator" },
+  { path:"calendar",    label:"Calendar",          icon:"calendar" },
+  { path:"profile",     label:"Profile",           icon:"user-circle" },
+];
+const current = () => (location.hash.replace("#/","") || "home");
+
+function renderNav(){
+  const cur = current();
+  $("#nav").innerHTML = ROUTES.map(r => {
+    let badge = "";
+    if (r.path === "marketplace" && cartCount()) badge = `<span class="badge">${cartCount()}</span>`;
+    if (r.path === "orders" && activeOrders().length) badge = `<span class="badge">${activeOrders().length}</span>`;
+    return `<a href="#/${r.path}" class="${cur===r.path?"active":""}"><i data-lucide="${r.icon}"></i>${r.label}${badge}</a>`;
+  }).join("");
+}
+
+function render(){
+  const cur = current();
+  const page = PAGES[cur] || PAGES.home;
+  $("#view").innerHTML = page();
+  renderNav(); ico();
+  if (cur === "calculator") calcUpdate();
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange", render);
+
+/* =====================================================
+   PAGES
+===================================================== */
+const PAGES = {};
+
+/* ---------- HOME ---------- */
+PAGES.home = () => {
+  const h = new Date().getHours();
+  const part = h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
+  const inSeason = S.products.filter(p => p.cat==="Vegetables").length;
+  return `
+  <h1 class="page-title">Good ${part}, ${esc(S.profile.name)}</h1>
+  <p class="subtitle">${esc(S.profile.farm)} · Harvest Partner member</p>
+
+  <section class="hero">
+    <div class="eyebrow">Spring season · Week 40</div>
+    <h2>Tomato demand is up 12%. Your next harvest lands on 2 Oct.</h2>
+    <a href="#/marketplace"><button class="btn hero-btn">Open the marketplace <i data-lucide="arrow-right"></i></button></a>
+  </section>
+
+  <section class="grid g4 mt">
+    <div class="card"><div class="stat-label">Wallet balance</div><div class="stat-value">${money(S.wallet)}</div><div class="stat-note">Available for payout</div></div>
+    <div class="card"><div class="stat-label">Active orders</div><div class="stat-value">${activeOrders().length}</div><div class="stat-note">${activeOrders().filter(o=>o.status===2).length + 1} deliveries this week</div></div>
+    <div class="card"><div class="stat-label">Sales this month</div><div class="stat-value">${money(S.salesThisMonth)}</div><div class="stat-note">+9% vs September</div></div>
+    <div class="card"><div class="stat-label">Listed produce</div><div class="stat-value">6 lines</div><div class="stat-note">${inSeason} in season</div></div>
+  </section>
+
+  <section class="grid g4 mt-s">
+    <a href="#/marketplace" style="text-decoration:none;color:inherit"><button class="action" style="width:100%"><span class="icon"><i data-lucide="shopping-basket"></i></span>Buy produce</button></a>
+    <a href="#/orders" style="text-decoration:none;color:inherit"><button class="action" style="width:100%"><span class="icon"><i data-lucide="truck"></i></span>Track deliveries</button></a>
+    <button class="action" onclick="payoutModal()"><span class="icon"><i data-lucide="wallet"></i></span>Request payout</button>
+    <a href="#/calendar" style="text-decoration:none;color:inherit"><button class="action" style="width:100%"><span class="icon"><i data-lucide="calendar"></i></span>View schedule</button></a>
+  </section>
+
+  <section class="grid g2 mt">
+    <div class="card">
+      <h3 style="margin-bottom:10px">Recent wallet activity</h3>
+      <table><tbody>${S.transactions.slice(0,4).map(t => `
+        <tr><td>${esc(t.desc)}<br><small style="color:var(--muted)">${fmtDate(t.date)}</small></td>
+        <td style="text-align:right" class="${t.amount>0?"pos":"neg"}">${t.amount>0?"+":"−"}${money(Math.abs(t.amount))}</td></tr>`).join("")}
+      </tbody></table>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:10px">Latest from the community</h3>
+      ${S.posts.slice(0,2).map(p => `<div style="padding:10px 0;border-bottom:1px solid var(--border)"><strong>${esc(p.author)}</strong><br><span style="color:var(--muted)">${esc(p.text)}</span></div>`).join("")}
+      <a href="#/community" style="color:var(--green);font-weight:600;text-decoration:none;display:inline-block;margin-top:12px">Open community →</a>
+    </div>
+  </section>`;
+};
+
+/* ---------- MARKETPLACE ---------- */
+let mkt = { q:"", cat:"All" };
+PAGES.marketplace = () => {
+  const cats = ["All", ...new Set(S.products.map(p => p.cat))];
+  const list = S.products.filter(p =>
+    (mkt.cat==="All" || p.cat===mkt.cat) &&
+    (p.name+p.farm).toLowerCase().includes(mkt.q.toLowerCase()));
+  return `
+  <div class="page-head">
+    <div><h1 class="page-title">Marketplace</h1><p class="subtitle">Buy fresh produce directly from co-op growers.</p></div>
+    <button class="btn" onclick="cartModal()"><i data-lucide="shopping-cart"></i> Cart (${cartCount()}) · ${money(cartTotal())}</button>
+  </div>
+  <div class="toolbar">
+    <input id="mq" placeholder="Search produce or farm…" value="${esc(mkt.q)}" oninput="mkt.q=this.value;refreshGrid()" />
+    <div class="chips">${cats.map(c => `<button class="chip ${mkt.cat===c?"on":""}" onclick="mkt.cat='${c}';render()">${c}</button>`).join("")}</div>
+  </div>
+  <div class="grid g3" id="grid">${productCards(list)}</div>`;
+};
+function productCards(list){
+  if (!list.length) return `<div class="empty card" style="grid-column:1/-1">No produce matches your search.</div>`;
+  return list.map(p => `
+    <div class="card product">
+      <div class="emoji">${p.emoji}</div>
+      <h3>${esc(p.name)}</h3>
+      <small style="color:var(--muted)">${esc(p.farm)} · ${p.stock} ${esc(p.unit.split(" ")[0])} in stock</small>
+      <div class="price">${money2(p.price)} <small style="font-family:'DM Sans';font-weight:400;color:var(--muted)">/ ${esc(p.unit)}</small></div>
+      <div class="row" style="margin-top:8px">
+        ${S.cart[p.id] ? `<div class="qty"><button onclick="cartAdd('${p.id}',-1)">−</button><strong>${S.cart[p.id]}</strong><button onclick="cartAdd('${p.id}',1)">+</button></div>` : `<span></span>`}
+        <button class="btn sm" onclick="cartAdd('${p.id}',${S.cart[p.id]?1:10})" style="flex:0 0 auto">${S.cart[p.id] ? "Add more" : "Add 10"}</button>
+      </div>
+    </div>`).join("");
+}
+function refreshGrid(){
+  const list = S.products.filter(p => (mkt.cat==="All"||p.cat===mkt.cat) && (p.name+p.farm).toLowerCase().includes(mkt.q.toLowerCase()));
+  $("#grid").innerHTML = productCards(list);
+}
+function cartAdd(id, d){
+  const p = S.products.find(x => x.id===id);
+  const next = (S.cart[id]||0) + d;
+  if (next <= 0) delete S.cart[id];
+  else if (next > p.stock) return toast("Only " + p.stock + " in stock", true);
+  else S.cart[id] = next;
+  save(); render();
+}
+function cartModal(){
+  const items = Object.entries(S.cart);
+  if (!items.length) return openModal(`<h3>Your cart</h3><p class="empty">Your cart is empty.</p><div class="actions-row"><button class="btn ghost" onclick="closeModal()">Close</button></div>`);
+  openModal(`<h3>Your cart</h3>
+    <table><tbody>${items.map(([id,q]) => { const p=S.products.find(x=>x.id===id); return `
+      <tr><td>${p.emoji} ${esc(p.name)}<br><small style="color:var(--muted)">${q} × ${money2(p.price)}</small></td>
+      <td style="text-align:right">${money2(p.price*q)}</td>
+      <td><button class="chip" onclick="cartAdd('${id}',-${q});cartModal()">✕</button></td></tr>`;}).join("")}</tbody></table>
+    <p class="mt-s"><strong>Total: ${money2(cartTotal())}</strong><br><small style="color:var(--muted)">Wallet balance: ${money2(S.wallet)}</small></p>
+    <div class="actions-row"><button class="btn ghost" onclick="closeModal()">Keep shopping</button><button class="btn" onclick="checkout()">Pay from wallet</button></div>`);
+}
+function checkout(){
+  const total = cartTotal();
+  if (total > S.wallet) return toast("Not enough funds in your wallet", true);
+  const names = Object.entries(S.cart).map(([id,q]) => { const p=S.products.find(x=>x.id===id); p.stock-=q; return `${p.name} × ${q}`; });
+  const eta = new Date(Date.now() + 3*864e5).toISOString().slice(0,10);
+  const id = "HC-" + (2042 + S.orders.length);
+  S.orders.unshift({ id, item:names.join(", "), total, status:0, placed:todayISO(), eta });
+  S.wallet -= total;
+  S.transactions.unshift({ id:"t"+rand(), date:todayISO(), desc:"Purchase — order " + id, amount:-total });
+  S.events.push({ id:"e"+rand(), date:eta, title:"Delivery · " + id, type:"delivery" });
+  S.cart = {}; save(); closeModal(); toast("Order " + id + " placed!"); location.hash = "#/orders"; render();
+}
+
+/* ---------- ORDERS ---------- */
+const STEPS = ["Placed","Packed","In transit","Delivered"];
+PAGES.orders = () => `
+  <div class="page-head"><div><h1 class="page-title">Orders & Delivery</h1><p class="subtitle">Track every order from the farm gate to your door.</p></div></div>
+  ${S.orders.length ? S.orders.map(o => `
+    <div class="card mt-s">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div><h3>${o.id}</h3><span style="color:var(--muted)">${esc(o.item)}</span></div>
+        <div style="text-align:right"><div class="price">${money2(o.total)}</div>
+          <span class="pill ${o.status===3?"green":o.status===2?"blue":""}">${STEPS[o.status]}</span></div>
+      </div>
+      <div class="tracker">${STEPS.map((s,i) => `<div class="step ${i<=o.status?"done":""}"><div class="dot">${i<=o.status?"✓":""}</div>${s}</div>`).join("")}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;flex-wrap:wrap;gap:8px">
+        <small style="color:var(--muted)">Placed ${fmtDate(o.placed)} · ${o.status===3?"Delivered":"ETA "+fmtDate(o.eta)}</small>
+        ${o.status<3 ? `<button class="btn ghost sm" onclick="advance('${o.id}')">Advance status (demo)</button>` : ""}
+      </div>
+    </div>`).join("") : `<div class="card empty">No orders yet. Visit the marketplace to place one.</div>`}`;
+function advance(id){ const o = S.orders.find(x=>x.id===id); if (o.status<3){ o.status++; save(); render(); toast(o.id + ": " + STEPS[o.status]); } }
+
+/* ---------- WALLET ---------- */
+PAGES.wallet = () => `
+  <div class="page-head"><div><h1 class="page-title">Wallet</h1><p class="subtitle">Your co-op earnings and payments in one place.</p></div>
+    <div style="display:flex;gap:10px"><button class="btn ghost" onclick="topupModal()"><i data-lucide="plus"></i> Add funds</button><button class="btn" onclick="payoutModal()"><i data-lucide="arrow-up-right"></i> Request payout</button></div></div>
+  <div class="result"><div class="eyebrow">Available balance</div><div class="big">${money2(S.wallet)}</div>
+    <dl><dt>Income (all time)</dt><dd>${money(S.transactions.filter(t=>t.amount>0).reduce((a,t)=>a+t.amount,0))}</dd>
+        <dt>Spent / paid out</dt><dd>${money(Math.abs(S.transactions.filter(t=>t.amount<0).reduce((a,t)=>a+t.amount,0)))}</dd></dl></div>
+  <div class="card mt"><h3 style="margin-bottom:8px">Transactions</h3>
+    <table><thead><tr><th>Date</th><th>Description</th><th style="text-align:right">Amount</th></tr></thead><tbody>
+    ${S.transactions.map(t => `<tr><td>${fmtDate(t.date)}</td><td>${esc(t.desc)}</td><td style="text-align:right" class="${t.amount>0?"pos":"neg"}">${t.amount>0?"+":"−"}${money2(Math.abs(t.amount))}</td></tr>`).join("")}
+    </tbody></table></div>`;
+function payoutModal(){
+  openModal(`<h3>Request payout</h3>
+    <p style="color:var(--muted);margin-bottom:14px">Available: ${money2(S.wallet)}</p>
+    <div class="field"><label>Amount (R)</label><input id="po-amt" type="number" min="1" placeholder="e.g. 5000" /></div>
+    <div class="field"><label>Bank account</label><select id="po-bank"><option>FNB ••4821</option><option>Capitec ••0933</option><option>Standard Bank ••7710</option></select></div>
+    <div class="actions-row"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="doPayout()">Confirm payout</button></div>`);
+}
+function doPayout(){
+  const amt = parseFloat($("#po-amt").value);
+  if (!amt || amt <= 0) return toast("Enter a valid amount", true);
+  if (amt > S.wallet) return toast("Amount exceeds your balance", true);
+  S.wallet -= amt;
+  S.transactions.unshift({ id:"t"+rand(), date:todayISO(), desc:"Payout to " + $("#po-bank").value, amount:-amt });
+  save(); closeModal(); render(); toast(money(amt) + " payout requested");
+}
+function topupModal(){
+  openModal(`<h3>Add funds</h3>
+    <div class="field"><label>Amount (R)</label><input id="tu-amt" type="number" min="1" placeholder="e.g. 2000" /></div>
+    <div class="actions-row"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="doTopup()">Add funds</button></div>`);
+}
+function doTopup(){
+  const amt = parseFloat($("#tu-amt").value);
+  if (!amt || amt <= 0) return toast("Enter a valid amount", true);
+  S.wallet += amt;
+  S.transactions.unshift({ id:"t"+rand(), date:todayISO(), desc:"Top-up", amount:amt });
+  save(); closeModal(); render(); toast(money(amt) + " added");
+}
+
+/* ---------- CO-OP NETWORK ---------- */
+PAGES.network = () => `
+  <div class="page-head"><div><h1 class="page-title">Co-op Network</h1><p class="subtitle">${S.members.filter(m=>m.connected).length} connections · grow stronger together.</p></div></div>
+  <div class="grid g3">${S.members.map(m => `
+    <div class="card">
+      <div class="post-head"><div class="avatar">${initials(m.name)}</div><div><strong>${esc(m.name)}</strong><br><small style="color:var(--muted)">${esc(m.farm)}</small></div></div>
+      <p style="color:var(--muted);font-size:14px">📍 ${esc(m.region)}<br>🌱 ${esc(m.crops)}</p>
+      <button class="btn ${m.connected?"ghost":""} sm mt-s" onclick="toggleMember('${m.id}')">${m.connected?"Connected ✓":"Connect"}</button>
+    </div>`).join("")}</div>`;
+function toggleMember(id){ const m = S.members.find(x=>x.id===id); m.connected = !m.connected; save(); render(); toast(m.connected ? "Connected with " + m.name : "Connection removed"); }
+
+/* ---------- COMMUNITY ---------- */
+PAGES.community = () => `
+  <div class="page-head"><div><h1 class="page-title">Community</h1><p class="subtitle">Tips, questions and news from fellow growers.</p></div></div>
+  <div class="card"><textarea id="newpost" placeholder="Share a tip or ask the community a question…"></textarea>
+    <div style="text-align:right;margin-top:10px"><button class="btn" onclick="addPost()">Post</button></div></div>
+  ${S.posts.map(p => `
+    <div class="card mt-s">
+      <div class="post-head"><div class="avatar">${initials(p.author)}</div><div><strong>${esc(p.author)}</strong><br><small style="color:var(--muted)">${esc(p.time)}</small></div></div>
+      <p>${esc(p.text)}</p>
+      <div class="post-actions"><button class="${p.liked?"liked":""}" onclick="likePost('${p.id}')"><i data-lucide="heart"></i> ${p.likes}</button></div>
+    </div>`).join("")}`;
+function addPost(){
+  const t = $("#newpost").value.trim(); if (!t) return toast("Write something first", true);
+  S.posts.unshift({ id:"c"+rand(), author:S.profile.name + " " + S.profile.surname, time:"Just now", text:t, likes:0, liked:false });
+  save(); render(); toast("Posted to the community");
+}
+function likePost(id){ const p = S.posts.find(x=>x.id===id); p.liked = !p.liked; p.likes += p.liked ? 1 : -1; save(); render(); }
+
+/* ---------- CALCULATOR ---------- */
+const CROPS = {
+  Tomatoes:   { yield:60, price:14.5, seed:9000,  fert:12000, labour:18000, other:6000 },
+  Spinach:    { yield:18, price:22,   seed:5000,  fert:8000,  labour:14000, other:4000 },
+  Butternut:  { yield:25, price:9.8,  seed:3500,  fert:7000,  labour:9000,  other:3500 },
+  "Sweet corn":{ yield:8, price:7.2,  seed:2800,  fert:6500,  labour:5000,  other:3000 },
+  Onions:     { yield:40, price:8.5,  seed:4500,  fert:9000,  labour:8000,  other:3500 },
+};
+PAGES.calculator = () => `
+  <div class="page-head"><div><h1 class="page-title">Profit Calculator</h1><p class="subtitle">Estimate revenue, costs and break-even price before you plant.</p></div></div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="field"><label>Crop preset</label><select id="c-crop" onchange="calcPreset()">${Object.keys(CROPS).map(c=>`<option>${c}</option>`).join("")}</select></div>
+      <div class="row field"><div><label>Area (hectares)</label><input id="c-ha" type="number" value="2" min="0" step="0.1" oninput="calcUpdate()"></div>
+        <div><label>Yield (tonnes / ha)</label><input id="c-yield" type="number" value="60" min="0" step="0.5" oninput="calcUpdate()"></div></div>
+      <div class="field"><label>Selling price (R / kg)</label><input id="c-price" type="number" value="14.5" min="0" step="0.1" oninput="calcUpdate()"></div>
+      <h3 style="margin:18px 0 10px;font-size:18px">Costs per hectare (R)</h3>
+      <div class="row field"><div><label>Seed / seedlings</label><input id="c-seed" type="number" value="9000" oninput="calcUpdate()"></div>
+        <div><label>Fertiliser & chemicals</label><input id="c-fert" type="number" value="12000" oninput="calcUpdate()"></div></div>
+      <div class="row field"><div><label>Labour</label><input id="c-labour" type="number" value="18000" oninput="calcUpdate()"></div>
+        <div><label>Water, fuel & other</label><input id="c-other" type="number" value="6000" oninput="calcUpdate()"></div></div>
+      <div class="field"><label>Co-op marketplace fee (%)</label><input id="c-fee" type="number" value="5" min="0" step="0.5" oninput="calcUpdate()"></div>
+    </div>
+    <div>
+      <div class="result"><div class="eyebrow">Estimated net profit</div><div class="big" id="r-profit">R0</div>
+        <dl>
+          <dt>Total harvest</dt><dd id="r-kg">—</dd>
+          <dt>Gross revenue</dt><dd id="r-rev">—</dd>
+          <dt>Production costs</dt><dd id="r-cost">—</dd>
+          <dt>Co-op fee</dt><dd id="r-fee">—</dd>
+          <dt>Profit margin</dt><dd id="r-margin">—</dd>
+          <dt>Profit per hectare</dt><dd id="r-perha">—</dd>
+          <dt>Break-even price</dt><dd id="r-be">—</dd>
+        </dl></div>
+      <p class="mt-s" style="color:var(--muted);font-size:14px" id="r-note"></p>
+    </div>
+  </div>`;
+function calcPreset(){
+  const p = CROPS[$("#c-crop").value];
+  $("#c-yield").value = p.yield; $("#c-price").value = p.price;
+  $("#c-seed").value = p.seed; $("#c-fert").value = p.fert; $("#c-labour").value = p.labour; $("#c-other").value = p.other;
+  calcUpdate();
+}
+function calcUpdate(){
+  const v = id => parseFloat($("#"+id).value) || 0;
+  const ha = v("c-ha"), kg = ha * v("c-yield") * 1000;
+  const rev = kg * v("c-price");
+  const cost = ha * (v("c-seed") + v("c-fert") + v("c-labour") + v("c-other"));
+  const fee = rev * v("c-fee") / 100;
+  const profit = rev - cost - fee;
+  const margin = rev ? profit / rev * 100 : 0;
+  const be = kg ? cost / (kg * (1 - v("c-fee")/100)) : 0;
+  $("#r-profit").textContent = (profit<0?"−":"") + money(Math.abs(profit));
+  $("#r-kg").textContent = Math.round(kg).toLocaleString("en-ZA") + " kg";
+  $("#r-rev").textContent = money(rev);
+  $("#r-cost").textContent = money(cost);
+  $("#r-fee").textContent = money(fee);
+  $("#r-margin").textContent = margin.toFixed(1) + "%";
+  $("#r-perha").textContent = ha ? money(profit/ha) : "—";
+  $("#r-be").textContent = money2(be) + " / kg";
+  $("#r-note").textContent = profit < 0
+    ? "At these numbers you would make a loss. Try a higher price or lower costs."
+    : "Your selling price is " + (v("c-price") - be).toFixed(2) + " R/kg above break-even.";
+}
+
+/* ---------- CALENDAR ---------- */
+let calMonth = new Date(); calMonth.setDate(1);
+PAGES.calendar = () => {
+  const y = calMonth.getFullYear(), m = calMonth.getMonth();
+  const first = new Date(y, m, 1), startDow = (first.getDay() + 6) % 7; // Monday first
+  const days = new Date(y, m+1, 0).getDate();
+  const cells = [];
+  for (let i = 0; i < startDow; i++) cells.push({ out:true, d:new Date(y, m, 1 - (startDow - i)) });
+  for (let d = 1; d <= days; d++) cells.push({ out:false, d:new Date(y, m, d) });
+  while (cells.length % 7) cells.push({ out:true, d:new Date(y, m, days + (cells.length - startDow - days) + 1) });
+  const iso = d => new Date(d.getTime() - d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+  const t = todayISO();
+  const up = S.events.filter(e => e.date >= t).sort((a,b) => a.date.localeCompare(b.date)).slice(0,6);
+  return `
+  <div class="page-head"><div><h1 class="page-title">Calendar</h1><p class="subtitle">Market days, harvests and deliveries.</p></div>
+    <button class="btn" onclick="eventModal('${t}')"><i data-lucide="plus"></i> Add event</button></div>
+  <div class="grid" style="grid-template-columns:2fr 1fr">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <button class="btn ghost sm" onclick="calNav(-1)">←</button>
+        <h3>${calMonth.toLocaleDateString("en-ZA",{month:"long",year:"numeric"})}</h3>
+        <button class="btn ghost sm" onclick="calNav(1)">→</button></div>
+      <div class="cal">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>`<div class="dow">${d}</div>`).join("")}
+      ${cells.map(c => { const k = iso(c.d); return `<div class="day ${c.out?"out":""} ${k===t?"today":""}" onclick="eventModal('${k}')"><strong>${c.d.getDate()}</strong>
+        ${S.events.filter(e=>e.date===k).map(e=>`<div class="ev ${e.type}" title="${esc(e.title)}">${esc(e.title)}</div>`).join("")}</div>`; }).join("")}
+      </div>
+    </div>
+    <div class="card"><h3 style="margin-bottom:10px">Upcoming</h3>
+      ${up.length ? up.map(e => `<div style="padding:10px 0;border-bottom:1px solid var(--border)"><span class="ev ${e.type}" style="display:inline-block">${e.type}</span><br><strong>${esc(e.title)}</strong><br><small style="color:var(--muted)">${fmtDate(e.date)}</small></div>`).join("") : `<p class="empty">Nothing coming up.</p>`}
+    </div>
+  </div>`;
+};
+function calNav(d){ calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + d, 1); render(); }
+function eventModal(date){
+  const existing = S.events.filter(e => e.date === date);
+  openModal(`<h3>${fmtDate(date)}</h3>
+    ${existing.map(e => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><span class="ev ${e.type}" style="font-size:13px">${esc(e.title)}</span><button class="chip" onclick="delEvent('${e.id}','${date}')">Remove</button></div>`).join("")}
+    <div class="field mt-s"><label>New event title</label><input id="ev-title" placeholder="e.g. Spinach harvest"></div>
+    <div class="field"><label>Type</label><select id="ev-type"><option value="harvest">Harvest</option><option value="market">Market day</option><option value="delivery">Delivery</option><option value="other">Other</option></select></div>
+    <div class="actions-row"><button class="btn ghost" onclick="closeModal()">Close</button><button class="btn" onclick="addEvent('${date}')">Add event</button></div>`);
+}
+function addEvent(date){
+  const title = $("#ev-title").value.trim(); if (!title) return toast("Give the event a title", true);
+  S.events.push({ id:"e"+rand(), date, title, type:$("#ev-type").value }); save(); closeModal(); render(); toast("Event added");
+}
+function delEvent(id, date){ S.events = S.events.filter(e => e.id !== id); save(); render(); eventModal(date); }
+
+/* ---------- PROFILE ---------- */
+PAGES.profile = () => {
+  const p = S.profile;
+  return `
+  <div class="page-head"><div><h1 class="page-title">Profile</h1><p class="subtitle">Manage your farm and account details.</p></div></div>
+  <div class="grid" style="grid-template-columns:1fr 2fr">
+    <div class="card" style="text-align:center">
+      <div class="avatar" style="width:84px;height:84px;font-size:30px;margin:0 auto 14px">${initials(p.name+" "+p.surname)}</div>
+      <h3>${esc(p.name)} ${esc(p.surname)}</h3>
+      <p style="color:var(--muted)">${esc(p.farm)}</p><span class="pill green" style="margin-top:10px">Harvest Partner</span>
+      <p style="color:var(--muted);font-size:14px;margin-top:16px">${esc(p.bio)}</p>
+    </div>
+    <div class="card">
+      <div class="row field"><div><label>First name</label><input id="pf-name" value="${esc(p.name)}"></div><div><label>Surname</label><input id="pf-surname" value="${esc(p.surname)}"></div></div>
+      <div class="field"><label>Farm name</label><input id="pf-farm" value="${esc(p.farm)}"></div>
+      <div class="row field"><div><label>Email</label><input id="pf-email" type="email" value="${esc(p.email)}"></div><div><label>Phone</label><input id="pf-phone" value="${esc(p.phone)}"></div></div>
+      <div class="row field"><div><label>Region</label><input id="pf-region" value="${esc(p.region)}"></div><div><label>Farm size (ha)</label><input id="pf-size" type="number" value="${esc(p.size)}"></div></div>
+      <div class="field"><label>Main crops</label><input id="pf-crops" value="${esc(p.crops)}"></div>
+      <div class="field"><label>About your farm</label><textarea id="pf-bio">${esc(p.bio)}</textarea></div>
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <button class="btn ghost" onclick="resetData()">Reset demo data</button>
+        <button class="btn" onclick="saveProfile()">Save changes</button></div>
+    </div>
+  </div>`;
+};
+function saveProfile(){
+  const g = id => $("#pf-"+id).value.trim();
+  if (!g("name")) return toast("First name is required", true);
+  Object.assign(S.profile, { name:g("name"), surname:g("surname"), farm:g("farm"), email:g("email"), phone:g("phone"), region:g("region"), size:g("size"), crops:g("crops"), bio:g("bio") });
+  save(); render(); toast("Profile saved");
+}
+function resetData(){ if (confirm("Reset everything back to the demo data?")) { localStorage.removeItem(KEY); S = structuredClone(DEFAULT); render(); toast("Demo data restored"); } }
+
+/* ---------- START ---------- */
+render();
+</script>
+</body>
+</html>
